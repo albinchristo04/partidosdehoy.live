@@ -1,0 +1,36 @@
+---
+import { focusCountries, type CountryBroadcasters } from '../lib/data';
+
+interface Props {
+  // If provided, render only these country codes; otherwise all focus countries.
+  only?: string[];
+}
+const { only } = Astro.props;
+const rows = (only
+  ? focusCountries.filter((c) => only.includes(c.code))
+  : focusCountries) as { code: string; data: CountryBroadcasters }[];
+---
+<table>
+  <thead>
+    <tr>
+      <th>País</th>
+      <th>Dónde ver (oficial)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {rows.map(({ data }) => (
+      <tr>
+        <td><strong>{data.name}</strong></td>
+        <td>
+          {data.broadcasters.map((b, i) => (
+            <>
+              {i > 0 && <span style="color:var(--muted)"> · </span>}
+              <a href={b.url} target="_blank" rel="nofollow noopener">{b.name}</a>
+              {' '}<span class={`pill ${b.access}`}>{b.access === 'free' ? 'Gratis' : 'Pago'}</span>
+            </>
+          ))}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>

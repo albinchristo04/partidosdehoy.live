@@ -1,0 +1,154 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchCard from '../components/MatchCard.astro';
+import BroadcasterTable from '../components/BroadcasterTable.astro';
+import { SITE } from '../../site.config';
+import {
+  getFixturesOnDate,
+  allMatchDates,
+  buildToday,
+  focusCountries,
+  countrySlug,
+} from '../lib/data';
+import { longDateFromYMD, cap } from '../lib/time';
+import { faqPage } from '../lib/schema';
+
+const today = buildToday();
+const todayMatches = getFixturesOnDate(today);
+
+// If there are no matches today, surface the next match day so the page is never empty.
+const dates = allMatchDates();
+const nextDate = dates.find((d) => d >= today);
+const showingNext = todayMatches.length === 0 && !!nextDate;
+const listed = todayMatches.length ? todayMatches : (nextDate ? getFixturesOnDate(nextDate) : []);
+const listedDate = todayMatches.length ? today : nextDate ?? today;
+
+const title = 'Partidos de Hoy: Horarios y Dónde Verlos en Vivo | Fútbol Hoy';
+const description =
+  'Partidos de hoy del Mundial 2026: horarios por país, canal oficial y dónde ver cada partido en vivo. Lista actualizada a diario con la transmisión oficial.';
+
+const faq = faqPage([
+  {
+    q: '¿Qué partidos hay hoy?',
+    a: listed.length
+      ? `Hoy (${longDateFromYMD(listedDate)}) se juegan: ${listed
+          .map((f) => `${f.teamA} vs ${f.teamB}`)
+          .join('; ')}. Cada partido enlaza a su canal oficial por país.`
+      : 'En esta fecha no hay partidos del Mundial 2026 programados. Revisa el calendario completo en la sección Mundial.',
+  },
+  {
+    q: '¿Dónde puedo ver los partidos de hoy en vivo?',
+    a: 'En la cadena o plataforma con derechos oficiales de tu país: TV Pública/Telefe (Argentina), Caracol/RCN (Colombia), Canal 5/ViX (México), Globo/CazéTV (Brasil) y Disney+/ESPN o DGO en el resto de la región. Cada ficha de partido tiene el enlace oficial.',
+  },
+  {
+    q: '¿A qué hora juegan hoy?',
+    a: 'Los horarios cambian según el país. En cada partido mostramos la hora local para Argentina/Uruguay, Chile/Venezuela, Colombia/Perú/Ecuador, México y España.',
+  },
+  {
+    q: '¿Se puede ver el fútbol de hoy gratis?',
+    a: 'Sí, varios partidos se emiten en señal abierta gratuita: TV Pública en Argentina, Caracol y RCN en Colombia, Canal 5 y ViX en México, y CazéTV (YouTube) y Globo en Brasil. Lo indicamos con la etiqueta "Gratis".',
+  },
+]);
+---
+<Base title={title} description={description} schema={faq}>
+  <h1>Partidos de Hoy — Horarios y Transmisión Oficial</h1>
+  <p class="lead">
+    Estos son los <strong>partidos de hoy</strong> del Mundial 2026 con su horario
+    por país y el canal oficial para verlos en vivo. Actualizamos la lista cada día:
+    aquí encuentras qué partidos hay hoy, a qué hora juegan y dónde ver cada uno en
+    vivo, enlazando siempre a la transmisión oficial.
+  </p>
+
+  <h2>
+    {showingNext ? 'Próximos partidos' : 'Partidos de hoy'} — {cap(longDateFromYMD(listedDate))}
+  </h2>
+  {showingNext && (
+    <p class="note">
+      Hoy no hay partidos del Mundial programados. Te mostramos la próxima jornada
+      con partidos.
+    </p>
+  )}
+  {listed.length ? (
+    <ul class="matches">
+      {listed.map((f) => <MatchCard fixture={f} />)}
+    </ul>
+  ) : (
+    <p>No hay partidos programados. Consulta el <a href="/mundial">calendario del Mundial</a>.</p>
+  )}
+  <p class="updated">Actualizado: {cap(longDateFromYMD(today))}.</p>
+
+  <h2>¿Dónde ver los partidos de hoy por país?</h2>
+  <p>
+    El fútbol de hoy se reparte entre señal abierta gratuita y plataformas de pago
+    según el país. Esta es la guía rápida de <strong>dónde ver los partidos de hoy</strong>
+    con los canales oficiales de cada región:
+  </p>
+  <BroadcasterTable />
+  <p>
+    ¿Quieres el detalle completo de planes, apps y precios? Lee nuestra guía de
+    <a href="/como-ver">cómo ver el fútbol en cada país</a>.
+  </p>
+
+  <h2>Partidos de hoy por país</h2>
+  <div class="grid-countries">
+    {focusCountries.map(({ code, data }) => (
+      <a href={`/${countrySlug(code)}`}>Partidos de hoy en {data.name}</a>
+    ))}
+  </div>
+
+  <h2>Cómo usamos "partidos de hoy" para ayudarte a no perderte ningún partido</h2>
+  <p>
+    Cada mañana de partido actualizamos esta página con los <strong>partidos de hoy</strong>:
+    el cruce, la competición, la hora local en tu país y el canal oficial donde verlo
+    en vivo. La idea es simple: que en menos de diez segundos sepas qué se juega hoy,
+    a qué hora y en qué canal, sin tener que buscar en varios sitios. Durante el
+    Mundial 2026 los partidos del torneo aparecen primero; el resto del año la página
+    sigue recogiendo el fútbol del día.
+  </p>
+  <p>
+    El Mundial 2026 se disputa en Estados Unidos, México y Canadá, lo que significa
+    que los horarios caen en husos horarios distintos a los habituales para la
+    audiencia de habla hispana. Un partido que arranca a las 21:00 en la costa este de
+    Estados Unidos son las 22:00 en Argentina y Uruguay, las 21:00 en Chile y
+    Venezuela, las 20:00 en Colombia, Perú y Ecuador, y las 19:00 en Ciudad de México.
+    Por eso en cada ficha de partido incluimos el bloque de horarios multipaís, para
+    que no tengas que hacer la conversión tú mismo.
+  </p>
+  <p>
+    En cuanto a <strong>dónde ver fútbol hoy</strong>, la regla que seguimos es clara:
+    enlazamos únicamente a la cadena o plataforma que tiene los derechos oficiales de
+    transmisión en tu país. En Argentina, los partidos de la selección y los grandes
+    cruces se ven por la TV Pública y Telefe en abierto, y por TyC Sports, DGO o
+    Disney+ en pago. En Colombia, Caracol y RCN emiten en señal abierta, mientras que
+    Win Sports, DGO y Disney+ completan la oferta. En México, Canal 5 y TV Azteca dan
+    los partidos en abierto y ViX los ofrece en streaming gratuito. En Brasil, la Globo
+    y CazéTV (en YouTube, gratis) son las grandes referencias. En el resto de la región
+    andina y del Cono Sur, Disney+/ESPN y DGO concentran buena parte de la transmisión.
+  </p>
+  <p>
+    Mucha gente busca "ver el fútbol de hoy gratis", y la buena noticia es que cada
+    jornada hay partidos en señal abierta gratuita y totalmente legal. CazéTV transmite
+    todos los partidos del Mundial gratis por YouTube en Brasil; la TV Pública en
+    Argentina, Caracol y RCN en Colombia, y Canal 5 junto a ViX en México ofrecen
+    también cobertura gratuita. Siempre que un partido se pueda ver gratis y de forma
+    oficial lo marcamos con la etiqueta "Gratis" para que lo encuentres rápido.
+  </p>
+  <p>
+    Si solo quieres saber <strong>a qué hora juega tu selección hoy</strong>, entra en
+    la página de tu país: ahí filtramos el calendario para mostrarte los próximos
+    partidos de tu equipo con el horario local ya convertido y el canal oficial. Y si
+    buscas el calendario completo del torneo, la sección del Mundial reúne las 104
+    fixtures por grupo y fase eliminatoria.
+  </p>
+  <p>
+    Una última nota importante: no alojamos transmisiones ni enlazamos a reproductores
+    no oficiales. Todos los enlaces de "dónde ver" apuntan a las cadenas y plataformas
+    con derechos legítimos. Es la forma correcta de ver el fútbol y la que garantiza la
+    mejor calidad de imagen y la señal estable que esperas para no perderte ni un gol.
+  </p>
+
+  <p>
+    Vuelve cada día: esta página se regenera a diario con los <strong>partidos de hoy</strong>.
+    Guárdala en favoritos para tener siempre a mano qué se juega hoy y dónde verlo.
+  </p>
+</Base>

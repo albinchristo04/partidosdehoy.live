@@ -1,0 +1,60 @@
+---
+import MatchCard from './MatchCard.astro';
+import BroadcasterTable from './BroadcasterTable.astro';
+import { getCountry, teamFixtures, type Fixture } from '../lib/data';
+import { longDate, kickoffBlock, cap } from '../lib/time';
+
+interface Props { code: string; name: string; }
+const { code, name } = Astro.props;
+const country = getCountry(code)!;
+const seleccion = teamFixtures(code) as Fixture[];
+const hasTeam = seleccion.length > 0;
+const next = seleccion[0];
+---
+<nav class="crumbs"><a href="/">Inicio</a> › Partidos en {name}</nav>
+<h1>Partidos de Hoy en {name} — Horarios y Dónde Ver</h1>
+<p class="lead">
+  <strong>Partidos de hoy en {name}</strong>: a qué hora juegan, en qué canal y dónde ver
+  el fútbol y el Mundial 2026 en vivo con los canales oficiales de {name}.
+</p>
+
+<h2>Dónde ver fútbol en {name}</h2>
+<BroadcasterTable only={[code]} />
+<p>
+  {country.broadcasters.some((b) => b.access === 'free')
+    ? `En ${name} hay opción gratuita en señal abierta, además de las plataformas de pago para ver todos los partidos.`
+    : `En ${name} la transmisión es principalmente por plataformas de pago como Disney+/ESPN y DGO.`}
+</p>
+
+{hasTeam ? (
+  <section>
+    <h2>Próximos partidos de {name} en el Mundial 2026</h2>
+    <ul class="matches">
+      {seleccion.map((f) => <MatchCard fixture={f} showDate />)}
+    </ul>
+    {next && (
+      <p class="kickoff" style="margin-top:8px">
+        Próximo: <strong>{next.teamA} vs {next.teamB}</strong> — {cap(longDate(next.date))}.
+        Horarios: {kickoffBlock(next.date)}.
+      </p>
+    )}
+  </section>
+) : (
+  <p class="note">
+    La selección de {name} no figura en este cuadro de partidos, pero aquí tienes los
+    canales oficiales para ver el resto del Mundial 2026 en {name}.
+  </p>
+)}
+
+<h2>A qué hora juegan hoy en {name}</h2>
+<p>
+  Los horarios del Mundial 2026 dependen del huso horario de {name}, ya que el torneo se
+  juega en Estados Unidos, México y Canadá. En cada ficha de partido mostramos la hora
+  local convertida para que no tengas que calcularla.
+</p>
+
+<p style="margin-top:24px">
+  Mira todos los <a href="/">partidos de hoy</a>, el
+  <a href="/mundial">calendario del Mundial</a> o la guía de
+  <a href="/como-ver">cómo ver fútbol</a>.
+</p>

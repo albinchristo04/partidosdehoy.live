@@ -1,0 +1,11 @@
+---
+// Renders one or more JSON-LD blocks into <head>.
+interface Props {
+  data: unknown | unknown[];
+}
+const { data } = Astro.props;
+const blocks = Array.isArray(data) ? data : [data];
+---
+{blocks.map((b) => (
+  <script type="application/ld+json" set:html={JSON.stringify(b)} />
+))}

@@ -1,0 +1,52 @@
+---
+import Base from '../layouts/Base.astro';
+import CountryBody from '../components/CountryBody.astro';
+import { SITE } from '../../site.config';
+import {
+  focusCountries,
+  getCountry,
+  countrySlug,
+  teamFixtures,
+} from '../lib/data';
+import { longDate, kickoffBlock } from '../lib/time';
+import { faqPage, breadcrumb } from '../lib/schema';
+
+interface Props { code: string; name: string; }
+
+export function getStaticPaths() {
+  return focusCountries.map(({ code, data }) => ({
+    params: { slug: countrySlug(code) },
+    props: { code, name: data.name },
+  }));
+}
+
+const { code, name } = Astro.props;
+const country = getCountry(code)!;
+const seleccion = teamFixtures(code);
+const next = seleccion[0];
+const hasTeam = seleccion.length > 0;
+
+const title = `Partidos de Hoy en ${name}: Horarios y Dónde Ver | Fútbol Hoy`;
+const description = `Partidos de hoy en ${name}: a qué hora juegan, en qué canal y dónde ver el fútbol y el Mundial 2026 en vivo con los canales oficiales de ${name}.`;
+const schema = [
+  breadcrumb([
+    { name: 'Inicio', url: `${SITE.url}/` },
+    { name: `Partidos en ${name}` },
+  ]),
+  faqPage([
+    {
+      q: hasTeam ? `¿A qué hora juega ${name} hoy?` : `¿Dónde ver fútbol hoy en ${name}?`,
+      a: hasTeam && next
+        ? `El próximo partido de ${name} es ${next.teamA} vs ${next.teamB}, el ${longDate(next.date)}. Horarios: ${kickoffBlock(next.date)}.`
+        : `En ${name} puedes ver los partidos por: ${country.broadcasters.map((b) => b.name).join(', ')}.`,
+    },
+    {
+      q: `¿Qué canal transmite el fútbol en ${name}?`,
+      a: `Los canales oficiales en ${name} son: ${country.broadcasters.map((b) => `${b.name} (${b.access === 'free' ? 'gratis' : 'pago'})`).join(', ')}.`,
+    },
+  ]),
+];
+---
+<Base title={title} description={description} schema={schema}>
+  <CountryBody code={code} name={name} />
+</Base>

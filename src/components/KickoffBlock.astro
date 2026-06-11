@@ -1,0 +1,14 @@
+---
+import { kickoffByZone } from '../lib/time';
+interface Props { iso: string; }
+const { iso } = Astro.props;
+const zones = kickoffByZone(iso);
+---
+<div class="kickoff">
+  Horario de inicio: {zones.map((z, i) => (
+    <>
+      {i > 0 && ' · '}
+      <strong>{z.time}</strong> ({z.label})
+    </>
+  ))}
+</div>

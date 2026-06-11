@@ -1,0 +1,83 @@
+---
+import Base from '../layouts/Base.astro';
+import BroadcasterTable from '../components/BroadcasterTable.astro';
+import { SITE } from '../../site.config';
+import { focusCountries, countrySlug } from '../lib/data';
+import { breadcrumb, faqPage } from '../lib/schema';
+
+const title = 'Cómo Ver Fútbol Hoy: Canales Oficiales por País | Partidos de Hoy';
+const description =
+  'Guía de cómo ver fútbol y el Mundial 2026 en vivo por país: canales oficiales en abierto y de pago, opciones gratis y plataformas de streaming legales.';
+
+const schema = [
+  breadcrumb([
+    { name: 'Inicio', url: `${SITE.url}/` },
+    { name: 'Cómo ver' },
+  ]),
+  faqPage([
+    {
+      q: '¿Cómo ver fútbol gratis y legal?',
+      a: 'En señal abierta: TV Pública (Argentina), Caracol y RCN (Colombia), Canal 5 y ViX (México), y CazéTV (YouTube) y Globo (Brasil). Son fuentes oficiales y gratuitas.',
+    },
+    {
+      q: '¿Qué plataforma de pago da más partidos?',
+      a: 'Disney+/ESPN y DGO (DSports) concentran buena parte de la transmisión en Sudamérica, con cobertura amplia del Mundial 2026 y otras competiciones.',
+    },
+  ]),
+];
+---
+<Base title={title} description={description} schema={schema}>
+  <nav class="crumbs"><a href="/">Inicio</a> › Cómo ver</nav>
+  <h1>Cómo Ver Fútbol Hoy — Canales Oficiales por País</h1>
+  <p class="lead">
+    Guía práctica y permanente de <strong>dónde ver fútbol hoy</strong> y el Mundial
+    2026 en vivo: qué canales lo dan en cada país, cuáles son gratis en señal abierta y
+    qué plataformas de pago ofrecen la mejor cobertura.
+  </p>
+
+  <h2>Resumen rápido por país</h2>
+  <BroadcasterTable />
+
+  {focusCountries.map(({ code, data }) => (
+    <section>
+      <h2>Cómo ver fútbol en {data.name}</h2>
+      <p>
+        En {data.name}, estas son las opciones oficiales para ver los partidos en vivo:
+      </p>
+      <ul>
+        {data.broadcasters.map((b) => (
+          <li>
+            <a href={b.url} target="_blank" rel="nofollow noopener">{b.name}</a>
+            {' — '}
+            <span class={`pill ${b.access}`}>{b.access === 'free' ? 'Gratis' : 'Pago'}</span>
+            {b.note && <span style="color:var(--muted)"> · {b.note}</span>}
+          </li>
+        ))}
+      </ul>
+      <p>
+        Consulta también los <a href={`/${countrySlug(code)}`}>partidos de hoy en {data.name}</a>.
+      </p>
+    </section>
+  ))}
+
+  <h2>¿Conviene la señal abierta gratuita o el streaming de pago?</h2>
+  <p>
+    Si solo te interesan los partidos más importantes y los de tu selección, la señal
+    abierta gratuita suele bastar: en la mayoría de países hay un canal en abierto que
+    emite los grandes cruces sin coste. Si quieres ver absolutamente todos los partidos,
+    elegir comentaristas o verlo en alta definición desde el móvil, las plataformas de
+    pago como Disney+/ESPN y DGO ofrecen la cobertura más completa. En Brasil, CazéTV
+    transmite los 104 partidos gratis por YouTube, una de las mejores opciones gratuitas
+    de toda la región.
+  </p>
+  <p class="note">
+    Importante: enlazamos únicamente a transmisiones oficiales. Evita reproductores no
+    autorizados; además de ser ilegales, suelen tener mala calidad y riesgos de
+    seguridad. La señal oficial gratuita es la mejor forma de ver el fútbol sin pagar.
+  </p>
+
+  <p style="margin-top:24px">
+    ¿Qué se juega hoy? Mira los <a href="/">partidos de hoy</a> o el
+    <a href="/mundial">calendario del Mundial 2026</a>.
+  </p>
+</Base>

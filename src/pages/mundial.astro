@@ -1,0 +1,80 @@
+---
+import Base from '../layouts/Base.astro';
+import MatchCard from '../components/MatchCard.astro';
+import BroadcasterTable from '../components/BroadcasterTable.astro';
+import { SITE } from '../../site.config';
+import { groupStage, knockout, sortByDate } from '../lib/data';
+import { breadcrumb, faqPage } from '../lib/schema';
+
+const title = 'Calendario del Mundial 2026: Partidos, Horarios y Dónde Ver | Fútbol Hoy';
+const description =
+  'Calendario completo del Mundial 2026: todos los partidos por grupo y fase eliminatoria, con horarios por país y dónde ver cada partido en vivo por canal oficial.';
+
+// Group fixtures by group letter.
+const groups = [...new Set(groupStage.map((f) => f.group))].filter(Boolean) as string[];
+const byGroup = groups.map((g) => ({
+  group: g,
+  matches: sortByDate(groupStage.filter((f) => f.group === g)),
+}));
+const knockoutSorted = sortByDate(knockout);
+
+const schema = [
+  breadcrumb([
+    { name: 'Inicio', url: `${SITE.url}/` },
+    { name: 'Mundial 2026' },
+  ]),
+  faqPage([
+    {
+      q: '¿Cuándo empieza el Mundial 2026?',
+      a: 'El Mundial 2026 arranca el 11 de junio de 2026 con el partido inaugural en el Estadio Azteca de Ciudad de México.',
+    },
+    {
+      q: '¿Dónde se juega el Mundial 2026?',
+      a: 'Se disputa en tres países: Estados Unidos, México y Canadá, con 104 partidos y 48 selecciones.',
+    },
+  ]),
+];
+---
+<Base title={title} description={description} schema={schema}>
+  <nav class="crumbs"><a href="/">Inicio</a> › Mundial 2026</nav>
+  <h1>Calendario del Mundial 2026 — Horarios y Dónde Ver</h1>
+  <p class="lead">
+    Todos los <strong>partidos del Mundial 2026</strong> por grupo y fase eliminatoria,
+    con su horario por país y el canal oficial para verlos en vivo. Toca cualquier
+    partido para ver el detalle de dónde verlo y a qué hora juega.
+  </p>
+
+  <p>
+    El torneo se disputa del 11 de junio al 19 de julio de 2026 en Estados Unidos,
+    México y Canadá. Es la primera Copa del Mundo con 48 selecciones y 104 partidos, así
+    que cada día de la fase de grupos hay varios cruces. Para una guía completa y
+    paneuropea de <a href="https://mundialenvivo.live" rel="noopener">dónde ver el
+    Mundial en vivo en toda Hispanoamérica</a> puedes ampliar la información; si estás en
+    Colombia o la región andina, esta <a href="https://mundialenvivo.sbs" rel="noopener">guía
+    para Colombia y los países andinos</a> entra en más detalle por canal local. Y para
+    la audiencia de Brasil existe una <a href="https://assistircopaaovivo.live" rel="noopener">guia
+    em português para assistir à Copa</a>.
+  </p>
+
+  <h2>Dónde ver el Mundial 2026 por país</h2>
+  <BroadcasterTable />
+
+  {byGroup.map(({ group, matches }) => (
+    <section>
+      <h2>Grupo {group}</h2>
+      <ul class="matches">
+        {matches.map((f) => <MatchCard fixture={f} showDate />)}
+      </ul>
+    </section>
+  ))}
+
+  <h2>Fase eliminatoria</h2>
+  <p>Dieciseisavos de final (los cruces se definen al cerrar la fase de grupos):</p>
+  <ul class="matches">
+    {knockoutSorted.map((f) => <MatchCard fixture={f} showDate />)}
+  </ul>
+
+  <p style="margin-top:24px">
+    ¿Solo quieres saber qué hay hoy? Vuelve a <a href="/">partidos de hoy</a>.
+  </p>
+</Base>

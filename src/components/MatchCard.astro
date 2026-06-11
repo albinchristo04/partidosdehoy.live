@@ -1,0 +1,25 @@
+---
+import type { Fixture } from '../lib/data';
+import { shortDate, cap } from '../lib/time';
+
+interface Props {
+  fixture: Fixture;
+  showDate?: boolean;
+}
+const { fixture, showDate = false } = Astro.props;
+const stageLabel = fixture.stage
+  ? 'Eliminatoria'
+  : fixture.group
+    ? `Grupo ${fixture.group}`
+    : 'Mundial 2026';
+---
+<li>
+  <a class="match" href={`/partidos/${fixture.slug}`}>
+    <div class="teams">{fixture.teamA} <span style="color:var(--muted)">vs</span> {fixture.teamB}</div>
+    <div class="meta">
+      <span>{stageLabel}</span>
+      {showDate && <span>{cap(shortDate(fixture.date))}</span>}
+      <span>{fixture.city}</span>
+    </div>
+  </a>
+</li>

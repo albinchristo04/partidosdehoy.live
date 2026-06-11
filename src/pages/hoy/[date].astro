@@ -1,0 +1,65 @@
+---
+import Base from '../../layouts/Base.astro';
+import MatchCard from '../../components/MatchCard.astro';
+import BroadcasterTable from '../../components/BroadcasterTable.astro';
+import { SITE } from '../../../site.config';
+import { allMatchDates, getFixturesOnDate } from '../../lib/data';
+import { longDateFromYMD, cap } from '../../lib/time';
+import { breadcrumb, faqPage } from '../../lib/schema';
+
+export function getStaticPaths() {
+  return allMatchDates().map((date) => ({
+    params: { date },
+    props: { date, matches: getFixturesOnDate(date) },
+  }));
+}
+
+interface Props { date: string; matches: ReturnType<typeof getFixturesOnDate>; }
+const { date, matches } = Astro.props;
+const dateLong = longDateFromYMD(date);
+
+const title = `Partidos del Mundial Hoy ${dateLong} — Horarios y Dónde Ver`;
+const description = `Partidos del Mundial 2026 el ${dateLong}: qué partidos hay, a qué hora juegan y dónde ver cada uno en vivo por canal oficial.`;
+
+const schema = [
+  breadcrumb([
+    { name: 'Inicio', url: `${SITE.url}/` },
+    { name: 'Mundial 2026', url: `${SITE.url}/mundial` },
+    { name: cap(dateLong) },
+  ]),
+  faqPage([
+    {
+      q: `¿Qué partidos del Mundial hay el ${dateLong}?`,
+      a: matches.length
+        ? matches.map((f) => `${f.teamA} vs ${f.teamB}`).join('; ') + '.'
+        : 'No hay partidos del Mundial programados en esta fecha.',
+    },
+  ]),
+];
+---
+<Base title={title} description={description} schema={schema}>
+  <nav class="crumbs">
+    <a href="/">Inicio</a> › <a href="/mundial">Mundial 2026</a> › {cap(dateLong)}
+  </nav>
+  <h1>Partidos del Mundial hoy — {cap(dateLong)}</h1>
+  <p class="lead">
+    Estos son los <strong>partidos del Mundial 2026</strong> del {dateLong} con su
+    horario por país y dónde verlos en vivo por el canal oficial.
+  </p>
+
+  {matches.length ? (
+    <ul class="matches">
+      {matches.map((f) => <MatchCard fixture={f} />)}
+    </ul>
+  ) : (
+    <p>No hay partidos en esta fecha. Consulta el <a href="/mundial">calendario completo</a>.</p>
+  )}
+
+  <h2>Dónde ver los partidos de hoy por país</h2>
+  <BroadcasterTable />
+
+  <p style="margin-top:24px">
+    Vuelve a <a href="/">partidos de hoy</a> o mira el
+    <a href="/mundial">calendario del Mundial</a>.
+  </p>
+</Base>

@@ -1,0 +1,98 @@
+---
+import KickoffBlock from './KickoffBlock.astro';
+import BroadcasterTable from './BroadcasterTable.astro';
+import { focusCountries, type Fixture } from '../lib/data';
+import { longDate, kickoffBlock, cap } from '../lib/time';
+
+interface Props { fixture: Fixture; }
+const { fixture: f } = Astro.props;
+
+const matchName = `${f.teamA} vs ${f.teamB}`;
+const dateLong = longDate(f.date);
+const isKnockout = !!f.stage;
+const stageLabel = isKnockout ? 'eliminatorias' : f.group ? `Grupo ${f.group}` : 'Mundial 2026';
+
+const freeOptions = focusCountries
+  .map(({ data }) => ({ country: data.name, b: data.broadcasters.find((x) => x.access === 'free') }))
+  .filter((x) => x.b);
+---
+<nav class="crumbs">
+  <a href="/">Inicio</a> › <a href="/partidos">Partidos</a> › {matchName}
+</nav>
+
+<h1>¿Dónde ver {f.teamA} vs {f.teamB} en vivo y a qué hora?</h1>
+
+<p class="lead">
+  <strong>{matchName}</strong> se juega el <strong>{dateLong}</strong> en {f.venue},
+  {f.city}, por el {stageLabel} del Mundial 2026. A continuación tienes el horario en tu
+  país, dónde verlo en vivo por el canal oficial y si hay opción gratuita.
+</p>
+
+<KickoffBlock iso={f.date} />
+
+<p style="margin-top:14px">
+  <span class="pill live">En vivo</span>
+  Para ver <strong>{matchName} en vivo</strong>, sintoniza el canal con derechos
+  oficiales de tu país (tabla abajo). Varios países lo emiten gratis en señal abierta.
+</p>
+
+<h2>¿Dónde ver {matchName}? Canal oficial por país</h2>
+<BroadcasterTable />
+<p class="note">
+  Enlazamos solo a transmisiones oficiales. La disponibilidad y los horarios pueden
+  cambiar; confirma con tu cadena local antes del inicio.
+</p>
+
+<h2>¿A qué hora juega {matchName} hoy?</h2>
+<p>El partido arranca a estas horas locales:</p>
+<p class="kickoff">{kickoffBlock(f.date)}</p>
+<p>
+  Recuerda que el Mundial 2026 se juega en Estados Unidos, México y Canadá, así que
+  conviene confirmar la hora local exacta en tu ciudad, sobre todo si tu país tiene
+  varios husos horarios.
+</p>
+
+<h2>Cómo ver {matchName} gratis y en vivo</h2>
+<p>
+  {freeOptions.length
+    ? `Hay señal abierta gratuita en varios países: ${freeOptions
+        .map((x) => `${x.b!.name} (${x.country})`)
+        .join(', ')}. `
+    : ''}
+  En Brasil, CazéTV transmite el partido gratis por YouTube. En Argentina suele estar en
+  la TV Pública en abierto, en Colombia en Caracol o RCN, y en México en Canal 5 y ViX.
+  Si prefieres streaming de pago, Disney+/ESPN y DGO ofrecen el partido en alta
+  definición en buena parte de la región.
+</p>
+
+<h2>Ficha del partido</h2>
+<table>
+  <tbody>
+    <tr><th>Partido</th><td>{matchName}</td></tr>
+    <tr><th>Competición</th><td>Mundial 2026 — {stageLabel}</td></tr>
+    <tr><th>Fecha</th><td>{cap(dateLong)}</td></tr>
+    <tr><th>Estadio</th><td>{f.venue}, {f.city}</td></tr>
+  </tbody>
+</table>
+
+<h2>Preguntas frecuentes</h2>
+<details open>
+  <summary>¿A qué hora juega {matchName}?</summary>
+  <p>El {dateLong}. Horarios: {kickoffBlock(f.date)}.</p>
+</details>
+<details>
+  <summary>¿Dónde ver {matchName} en vivo?</summary>
+  <p>En el canal oficial de tu país (tabla arriba): señal abierta gratuita en varios
+  países y streaming de pago en Disney+/ESPN y DGO.</p>
+</details>
+<details>
+  <summary>¿Se puede ver {matchName} gratis?</summary>
+  <p>Sí, en señal abierta gratuita y legal en varios países, además de CazéTV (YouTube)
+  en Brasil.</p>
+</details>
+
+<p style="margin-top:24px">
+  Más partidos: vuelve a <a href="/">partidos de hoy</a>, consulta
+  <a href="/partidos">todos los partidos</a> o el
+  <a href="/mundial">calendario del Mundial 2026</a>.
+</p>

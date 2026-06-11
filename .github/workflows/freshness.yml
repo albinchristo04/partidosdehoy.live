@@ -1,0 +1,54 @@
+name: Daily Freshness Rebuild
+
+# The freshness spearhead: rebuild today's fixtures + homepage each match morning
+# (and a few times on match days), deploy, and ping IndexNow so Bing re-crawls.
+on:
+  schedule:
+    # Times are UTC. Covers early morning + midday across LATAM on match days.
+    - cron: '0 11 * * *'   # ~06:00 CDMX
+    - cron: '0 16 * * *'   # ~11:00 CDMX
+    - cron: '0 21 * * *'   # ~16:00 CDMX
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: freshness
+  cancel-in-progress: true
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    env:
+      SITE: partidosdehoy.live
+      SITE_HOST: partidosdehoy.live
+      INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Stamp today's date (forces fresh output)
+        run: echo "BUILD_DATE=$(TZ=America/Mexico_City date +%F)" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=partidosdehoy-live --branch=main
+
+      - name: Ping IndexNow (Bing)
+        run: npm run indexnow

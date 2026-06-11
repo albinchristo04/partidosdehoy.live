@@ -65,5 +65,5 @@ Because this site is topically central and high-traffic, it's the natural place 
 - HTTPS, one H1/page.
 - Footer + share to Instagram page for social signals (tie via `sameAs` schema).
 
-## Constraints
-- Every channel link → official broadcaster; no embedded/unlicensed streams anywhere.
+AIM
+Atleast rank in top 10

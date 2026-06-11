@@ -1,0 +1,54 @@
+---
+import Base from '../../layouts/Base.astro';
+import MatchBody from '../../components/MatchBody.astro';
+import { SITE } from '../../../site.config';
+import { fixtures, focusCountries, type Fixture } from '../../lib/data';
+import { longDate, kickoffBlock } from '../../lib/time';
+import { sportsEvent, faqPage, breadcrumb } from '../../lib/schema';
+
+export function getStaticPaths() {
+  return fixtures.map((f) => ({
+    params: { slug: f.slug },
+    props: { fixture: f },
+  }));
+}
+
+const { fixture: f } = Astro.props as { fixture: Fixture };
+const matchName = `${f.teamA} vs ${f.teamB}`;
+const dateLong = longDate(f.date);
+
+const freeOptions = focusCountries
+  .map(({ data }) => ({ country: data.name, b: data.broadcasters.find((x) => x.access === 'free') }))
+  .filter((x) => x.b);
+
+const title = `${matchName}: Dónde Ver en Vivo y a Qué Hora | Mundial 2026`;
+const description = `${matchName} del Mundial 2026: a qué hora juegan, en qué canal y dónde ver el partido en vivo por país. Horario local y transmisión oficial.`;
+
+const schema = [
+  sportsEvent(f),
+  faqPage([
+    {
+      q: `¿A qué hora juega ${matchName}?`,
+      a: `${matchName} se juega el ${dateLong}. Horario por país: ${kickoffBlock(f.date)}.`,
+    },
+    {
+      q: `¿Dónde ver ${matchName} en vivo?`,
+      a: `En el canal oficial de tu país: TV Pública/Telefe (Argentina), Caracol/RCN (Colombia), Canal 5/ViX (México), Globo/CazéTV (Brasil) y Disney+/ESPN o DGO en el resto de la región.`,
+    },
+    {
+      q: `¿Se puede ver ${matchName} gratis?`,
+      a: freeOptions.length
+        ? `Sí, en señal abierta gratuita en varios países: ${freeOptions.slice(0, 4).map((x) => `${x.b!.name} (${x.country})`).join(', ')}.`
+        : 'Consulta la tabla de transmisión oficial por país.',
+    },
+  ]),
+  breadcrumb([
+    { name: 'Inicio', url: `${SITE.url}/` },
+    { name: 'Partidos', url: `${SITE.url}/partidos` },
+    { name: matchName },
+  ]),
+];
+---
+<Base title={title} description={description} schema={schema}>
+  <MatchBody fixture={f} />
+</Base>

@@ -1,0 +1,152 @@
+---
+import { SITE } from '../../site.config';
+import Schema from '../components/Schema.astro';
+import { orgWebsite } from '../lib/schema';
+
+interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  schema?: unknown | unknown[];
+}
+
+const { title, description, canonical, schema } = Astro.props;
+const canonicalUrl = canonical ?? new URL(Astro.url.pathname, SITE.url).href;
+const year = new Date().getFullYear();
+---
+<!doctype html>
+<html lang={SITE.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="robots" content="index, follow" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content={SITE.brand} />
+    <meta property="og:locale" content="es_ES" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <Schema data={orgWebsite()} />
+    {schema && <Schema data={schema} />}
+
+    <style is:inline>
+      :root {
+        --bg: #0b1020;
+        --panel: #131a30;
+        --panel-2: #1a2342;
+        --line: #28324f;
+        --text: #eef2ff;
+        --muted: #9aa7c7;
+        --accent: #38e07b;
+        --accent-2: #4f9dff;
+        --free: #38e07b;
+        --pay: #ffce54;
+        --radius: 12px;
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      a { color: var(--accent-2); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      .wrap { max-width: 860px; margin: 0 auto; padding: 0 16px; }
+      header.site {
+        border-bottom: 1px solid var(--line);
+        background: linear-gradient(180deg, #0e1428, #0b1020);
+        position: sticky; top: 0; z-index: 10;
+      }
+      header.site .wrap { display: flex; align-items: center; gap: 16px; padding: 12px 16px; flex-wrap: wrap; }
+      .logo { font-weight: 800; font-size: 1.1rem; color: var(--text); letter-spacing: -0.02em; }
+      .logo span { color: var(--accent); }
+      nav.main { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.92rem; }
+      nav.main a { color: var(--muted); }
+      nav.main a:hover { color: var(--text); }
+      main { padding: 24px 0 48px; }
+      h1 { font-size: 1.8rem; line-height: 1.2; margin: 0 0 8px; letter-spacing: -0.02em; }
+      h2 { font-size: 1.3rem; margin: 32px 0 12px; letter-spacing: -0.01em; }
+      h3 { font-size: 1.05rem; margin: 20px 0 8px; }
+      p { margin: 0 0 14px; }
+      .lead { color: var(--muted); font-size: 1.05rem; }
+      .pill { display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.03em; }
+      .pill.free { background: rgba(56,224,123,0.15); color: var(--free); }
+      .pill.pay { background: rgba(255,206,84,0.15); color: var(--pay); }
+      .pill.live { background: rgba(79,157,255,0.15); color: var(--accent-2); }
+      .matches { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+      .match {
+        display: block; background: var(--panel); border: 1px solid var(--line);
+        border-radius: var(--radius); padding: 14px 16px; color: var(--text);
+      }
+      .match:hover { border-color: var(--accent-2); text-decoration: none; background: var(--panel-2); }
+      .match .teams { font-weight: 700; font-size: 1.05rem; }
+      .match .meta { color: var(--muted); font-size: 0.88rem; margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; }
+      .kickoff { font-variant-numeric: tabular-nums; background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; color: var(--muted); font-size: 0.92rem; }
+      .kickoff strong { color: var(--text); }
+      table { width: 100%; border-collapse: collapse; margin: 8px 0 16px; font-size: 0.92rem; }
+      th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+      th { color: var(--muted); font-weight: 600; }
+      .btn {
+        display: inline-block; background: var(--accent); color: #06210f; font-weight: 800;
+        padding: 11px 18px; border-radius: var(--radius); margin: 6px 0;
+      }
+      .btn:hover { text-decoration: none; filter: brightness(1.06); }
+      .note { background: var(--panel); border-left: 3px solid var(--accent-2); padding: 12px 14px; border-radius: 8px; color: var(--muted); font-size: 0.92rem; }
+      .grid-countries { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: 8px; }
+      .grid-countries a { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--text); }
+      .grid-countries a:hover { border-color: var(--accent); text-decoration: none; }
+      details { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; margin: 8px 0; }
+      summary { cursor: pointer; font-weight: 600; }
+      footer.site { border-top: 1px solid var(--line); color: var(--muted); font-size: 0.86rem; padding: 24px 0 40px; }
+      footer.site .wrap { display: flex; flex-direction: column; gap: 8px; }
+      .crumbs { color: var(--muted); font-size: 0.82rem; margin-bottom: 10px; }
+      .crumbs a { color: var(--muted); }
+      .updated { color: var(--muted); font-size: 0.82rem; margin-top: 4px; }
+    </style>
+  </head>
+  <body>
+    <header class="site">
+      <div class="wrap">
+        <a class="logo" href="/">Partidos<span>deHoy</span></a>
+        <nav class="main">
+          <a href="/">Hoy</a>
+          <a href="/partidos">Partidos</a>
+          <a href="/mundial">Mundial 2026</a>
+          <a href="/como-ver">Cómo ver</a>
+          <a href="/argentina">Argentina</a>
+          <a href="/colombia">Colombia</a>
+          <a href="/mexico">México</a>
+        </nav>
+      </div>
+    </header>
+    <main>
+      <div class="wrap">
+        <slot />
+      </div>
+    </main>
+    <footer class="site">
+      <div class="wrap">
+        <p>
+          <strong>{SITE.brand}</strong> — horarios y transmisión oficial de los
+          partidos de hoy. Enlazamos únicamente a las cadenas y plataformas con
+          derechos oficiales. No alojamos ni enlazamos transmisiones no autorizadas.
+        </p>
+        <p>
+          {SITE.social.instagram && (<a href={`https://www.instagram.com/${SITE.social.instagram}`} rel="me">Instagram</a>)}
+          {SITE.social.x && (<> · <a href={`https://x.com/${SITE.social.x}`} rel="me">X</a></>)}
+        </p>
+        <p>© {year} {SITE.brand}. Horarios sujetos a confirmación oficial.</p>
+      </div>
+    </footer>
+  </body>
+</html>

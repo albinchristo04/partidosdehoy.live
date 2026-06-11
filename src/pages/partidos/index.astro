@@ -1,0 +1,82 @@
+---
+import Base from '../../layouts/Base.astro';
+import MatchCard from '../../components/MatchCard.astro';
+import { SITE } from '../../../site.config';
+import { groupStage, knockout, sortByDate } from '../../lib/data';
+import { breadcrumb, faqPage } from '../../lib/schema';
+
+const groups = [...new Set(groupStage.map((f) => f.group))].filter(Boolean) as string[];
+const byGroup = groups.sort().map((g) => ({
+  group: g,
+  matches: sortByDate(groupStage.filter((f) => f.group === g)),
+}));
+
+const STAGE_LABELS: Record<string, string> = {
+  r32: 'Dieciseisavos de Final',
+  r16: 'Octavos de Final',
+  qf: 'Cuartos de Final',
+  sf: 'Semifinales',
+  '3rd': 'Tercer Puesto',
+  final: 'Final',
+};
+
+const knockoutByStage = ['r32', 'r16', 'qf', 'sf', '3rd', 'final']
+  .map((stage) => ({
+    stage,
+    label: STAGE_LABELS[stage],
+    matches: sortByDate(knockout.filter((f) => f.stage === stage)),
+  }))
+  .filter((s) => s.matches.length > 0);
+
+const title = 'Todos los Partidos del Mundial 2026: Calendario por Grupo y Fase';
+const description =
+  'Calendario completo del Mundial 2026 con los 104 partidos por grupo y fase eliminatoria. Haz clic en cada partido para ver horarios por país y dónde verlo en vivo por canal oficial.';
+
+const schema = [
+  breadcrumb([
+    { name: 'Inicio', url: `${SITE.url}/` },
+    { name: 'Partidos del Mundial 2026' },
+  ]),
+  faqPage([
+    {
+      q: '¿Cuántos partidos tiene el Mundial 2026?',
+      a: 'El Mundial 2026 tiene 104 partidos en total: 72 de fase de grupos (12 grupos × 6 partidos) más 32 de fase eliminatoria (dieciseisavos, octavos, cuartos, semifinales, tercer puesto y final).',
+    },
+    {
+      q: '¿Cuándo juegan los grupos del Mundial 2026?',
+      a: 'La fase de grupos del Mundial 2026 se disputa del 11 de junio al 27 de junio de 2026. Los dieciseisavos de final arrancan el 28 de junio y la final se juega el 19 de julio de 2026.',
+    },
+  ]),
+];
+---
+<Base title={title} description={description} schema={schema}>
+  <h1>Partidos del Mundial 2026</h1>
+  <p class="lead">
+    Los 104 partidos del Mundial 2026, organizados por grupo y fase. Haz clic en
+    cualquier partido para ver el horario en tu país y dónde verlo en vivo.
+  </p>
+
+  <h2>Fase de Grupos</h2>
+  {byGroup.map(({ group, matches }) => (
+    <section class="group-section">
+      <h3>Grupo {group}</h3>
+      <ul class="matches">
+        {matches.map((f) => <MatchCard fixture={f} showDate />)}
+      </ul>
+    </section>
+  ))}
+
+  <h2>Fase Eliminatoria</h2>
+  {knockoutByStage.map(({ label, matches }) => (
+    <section class="group-section">
+      <h3>{label}</h3>
+      <ul class="matches">
+        {matches.map((f) => <MatchCard fixture={f} showDate />)}
+      </ul>
+    </section>
+  ))}
+</Base>
+
+<style>
+  .group-section { margin-bottom: 28px; }
+</style>
